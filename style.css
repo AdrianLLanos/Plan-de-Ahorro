@@ -50,3 +50,25 @@ input::placeholder{color:#9aaac0}
   .plan-title-row h3{font-size:24px}
   .celda{font-size:16px}
 }
+
+body.modal-open{overflow:hidden}
+.confirm-dialog{padding:0;width:min(520px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #3a4b63;border-radius:24px;background:linear-gradient(145deg,#17253b,#101a2b);color:var(--text);box-shadow:0 30px 100px #0009}
+.confirm-dialog::backdrop{background:#030914b8;backdrop-filter:blur(7px)}
+.confirm-content{padding:30px}
+.confirm-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:22px}
+.confirm-icon{display:grid;place-items:center;width:60px;height:60px;border-radius:18px;background:#fbbf2412;border:1px solid #fbbf2444;color:#fcd34d;font-size:36px;font-weight:600}
+.confirm-close{display:grid;place-items:center;width:44px;height:44px;border-radius:12px;border:1px solid #334155;background:#1e293b;color:#cbd5e1;font-size:28px;line-height:1}
+.confirm-close:hover{background:#334155;color:white}
+.confirm-dialog h2{font-size:28px;line-height:1.25;letter-spacing:-.8px;margin-bottom:14px}
+.confirm-dialog p{font-size:17px;color:#b9c6d8;line-height:1.75}
+.confirm-plan{padding:16px 18px;border:1px solid #334155;border-radius:14px;background:#0b132399;margin:24px 0}
+.confirm-plan span{display:block;font-size:12px;font-weight:700;letter-spacing:1.4px;color:#aabbd1;margin-bottom:7px}
+.confirm-plan strong{font-size:18px;overflow-wrap:anywhere}
+.confirm-actions{display:flex;gap:12px;justify-content:flex-end}
+.confirm-actions .button{min-height:48px;font-size:16px;padding:12px 20px}
+.confirm-accept{background:#fbbf24;color:#241601;border-color:#fcd34d}
+.confirm-accept:hover{background:#fcd34d}
+.confirm-dialog[data-variant=delete] .confirm-icon{color:#fda4af;background:#fb718514;border-color:#fb718544}
+.confirm-dialog[data-variant=delete] .confirm-accept{background:#fb7185;border-color:#fda4af;color:#300b13}
+.confirm-dialog[data-variant=delete] .confirm-accept:hover{background:#fda4af}
+@media(max-width:480px){.confirm-content{padding:24px}.confirm-dialog h2{font-size:26px}.confirm-actions{flex-direction:column-reverse}.confirm-actions .button{width:100%}}

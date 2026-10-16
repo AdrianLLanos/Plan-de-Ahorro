@@ -28,6 +28,36 @@ function connection(text, type = '') {
   $('conexion').className = `connection ${type}`;
 }
 
+function confirmAction(action, plan) {
+  const dialog = $('confirmacion');
+  if (dialog.open) return Promise.resolve(false);
+  const deleting = action === 'delete';
+  dialog.dataset.variant = deleting ? 'delete' : 'reset';
+  $('confirm-icon').textContent = deleting ? '×' : '↺';
+  $('confirm-title').textContent = deleting ? '¿Eliminar este plan?' : '¿Reiniciar progreso?';
+  $('confirm-description').textContent = deleting
+    ? 'Se eliminarán el plan y todo su progreso. Esta acción no se puede deshacer.'
+    : 'Se desmarcarán todas las casillas y el ahorro registrado volverá a cero. Tu plan y su meta se conservarán.';
+  $('confirm-plan').textContent = plan.titulo;
+  $('confirm-accept').textContent = deleting ? 'Sí, eliminar plan' : 'Sí, reiniciar';
+  dialog.returnValue = '';
+  return new Promise(resolve => {
+    dialog.addEventListener('close', () => {
+      document.body.classList.remove('modal-open');
+      resolve(dialog.returnValue === 'confirm');
+    }, { once: true });
+    dialog.showModal();
+    document.body.classList.add('modal-open');
+  });
+}
+
+$('confirmacion').addEventListener('click', event => {
+  const dialog = $('confirmacion');
+  if (event.target !== dialog) return;
+  const bounds = dialog.getBoundingClientRect();
+  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close('cancel');
+});
+
 function planCard(plan) {
   const stats = summarize(plan);
   const filter = filters.get(plan.id) || 'all';
@@ -181,10 +211,12 @@ $('planes').addEventListener('click', async event => {
       return { cells: plan.celdas.map((cell, i) => i === index ? { ...cell, activo: desired } : cell) };
     });
   }
-  if (action === 'reset' && window.confirm('¿Reiniciar el progreso de este plan? Se desmarcarán todas sus casillas.')) {
+  const selectedPlan = planes.find(plan => plan.id === id);
+  if (!selectedPlan) return;
+  if (action === 'reset' && await confirmAction(action, selectedPlan)) {
     await changePlan(id, plan => ({ cells: plan.celdas.map(cell => ({ ...cell, activo: false })), message: 'Progreso reiniciado.' }));
   }
-  if (action === 'delete' && window.confirm('¿Eliminar este plan y todo su progreso? Esta acción no se puede deshacer.')) {
+  if (action === 'delete' && await confirmAction(action, selectedPlan)) {
     await changePlan(id, () => ({ remove: true, message: 'Plan eliminado.' }));
   }
 });
