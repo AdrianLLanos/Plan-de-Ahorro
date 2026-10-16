@@ -1,0 +1,10 @@
+.review-modernizacion/
+.github-upload/
+node_modules/
+.env
+.env.*
+!.env.example
+.firebase/
+*-debug.log
+Thumbs.db
+.DS_Store
