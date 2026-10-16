@@ -42,10 +42,26 @@ function confirmAction(action, plan) {
   $('confirm-accept').textContent = deleting ? 'Sí, eliminar plan' : 'Sí, reiniciar';
   dialog.returnValue = '';
   return new Promise(resolve => {
-    dialog.addEventListener('close', () => {
+    const finish = accepted => {
+      dialog.removeEventListener('submit', onSubmit);
+      dialog.removeEventListener('cancel', onCancel);
+      dialog.removeEventListener('close', onClose);
+      if (dialog.open) dialog.close(accepted ? 'confirm' : 'cancel');
       document.body.classList.remove('modal-open');
-      resolve(dialog.returnValue === 'confirm');
-    }, { once: true });
+      resolve(accepted);
+    };
+    const onSubmit = event => {
+      event.preventDefault();
+      finish(event.submitter?.value === 'confirm');
+    };
+    const onCancel = event => {
+      event.preventDefault();
+      finish(false);
+    };
+    const onClose = () => finish(dialog.returnValue === 'confirm');
+    dialog.addEventListener('submit', onSubmit);
+    dialog.addEventListener('cancel', onCancel);
+    dialog.addEventListener('close', onClose);
     dialog.showModal();
     document.body.classList.add('modal-open');
   });
@@ -55,7 +71,7 @@ $('confirmacion').addEventListener('click', event => {
   const dialog = $('confirmacion');
   if (event.target !== dialog) return;
   const bounds = dialog.getBoundingClientRect();
-  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.close('cancel');
+  if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
 });
 
 function planCard(plan) {
