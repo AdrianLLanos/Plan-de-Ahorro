@@ -51,6 +51,12 @@ input::placeholder{color:#9aaac0}
   .celda{font-size:16px}
 }
 
+.plan-name{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px}
+.plan-name h3{min-width:0}
+.edit-plan{font-size:14px;padding:8px 12px}
+#edit-form>.field{margin-bottom:20px}
+#edit-help{margin-bottom:22px;font-size:15px}
+#edit-title{margin-bottom:0}
 body.modal-open{overflow:hidden}
 .confirm-dialog{padding:0;width:min(520px,calc(100% - 32px));max-height:calc(100dvh - 40px);overflow:auto;border:1px solid #3a4b63;border-radius:24px;background:linear-gradient(145deg,#17253b,#101a2b);color:var(--text);box-shadow:0 30px 100px #0009}
 .confirm-dialog::backdrop{background:#030914b8;backdrop-filter:blur(7px)}

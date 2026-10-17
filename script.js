@@ -1,4 +1,4 @@
-import { createCells, summarize, applyDeposit } from './savings.mjs';
+import { createCells, summarize, applyDeposit, editPlan } from './savings.mjs';
 
 const $ = id => document.getElementById(id);
 const money = value => '$' + new Intl.NumberFormat('es-BO', { maximumFractionDigits: 2 }).format(value);
@@ -74,6 +74,63 @@ $('confirmacion').addEventListener('click', event => {
   if (event.clientX < bounds.left || event.clientX > bounds.right || event.clientY < bounds.top || event.clientY > bounds.bottom) dialog.dispatchEvent(new Event('cancel', { cancelable: true }));
 });
 
+let editingId = null;
+let savingEdit = false;
+
+function openEditor(plan) {
+  if ($('editar-plan').open) return;
+  editingId = plan.id;
+  $('edit-name').value = plan.titulo;
+  $('edit-goal').value = plan.objetivo;
+  $('edit-error').hidden = true;
+  $('editar-plan').showModal();
+  document.body.classList.add('modal-open');
+  $('edit-name').focus();
+}
+
+function closeEditor() {
+  if (!savingEdit) $('editar-plan').close();
+}
+
+$('edit-cancel').addEventListener('click', closeEditor);
+$('edit-close').addEventListener('click', closeEditor);
+$('editar-plan').addEventListener('cancel', event => {
+  if (savingEdit) event.preventDefault();
+});
+$('editar-plan').addEventListener('close', () => {
+  editingId = null;
+  document.body.classList.remove('modal-open');
+});
+$('edit-form').addEventListener('submit', async event => {
+  event.preventDefault();
+  if (savingEdit || !editingId) return;
+  const id = editingId;
+  const title = $('edit-name').value;
+  const goal = $('edit-goal').value;
+  $('edit-error').hidden = true;
+  savingEdit = true;
+  const controls = [...$('edit-form').querySelectorAll('button,input')];
+  controls.forEach(control => { control.disabled = true; });
+  $('edit-save').textContent = 'Guardando…';
+  try {
+    const saved = await changePlan(id, plan => ({
+      updates: editPlan(plan, title, goal),
+      message: 'Nombre y meta actualizados.',
+    }));
+    if (saved) $('editar-plan').close();
+    else {
+      $('edit-error').textContent = $('mensaje').textContent || 'Espera a que se conecte Firebase e inténtalo de nuevo.';
+      $('edit-error').hidden = false;
+    }
+  } finally {
+    savingEdit = false;
+    controls.forEach(control => { control.disabled = false; });
+    $('edit-save').textContent = 'Guardar cambios';
+    if ($('editar-plan').open) $('edit-name').focus();
+    else [...document.querySelectorAll('.plan')].find(card => card.dataset.planId === id)?.querySelector('[data-action="edit"]')?.focus({ preventScroll: true });
+  }
+});
+
 function planCard(plan) {
   const stats = summarize(plan);
   const filter = filters.get(plan.id) || 'all';
@@ -88,7 +145,7 @@ function planCard(plan) {
   const amountSummary = uniqueAmounts.length <= 3 ? uniqueAmounts.map(money).join(' / ') : 'Montos variables';
   const goalReached = stats.saved >= Number(plan.objetivo);
   return `<article class="plan" data-plan-id="${id}" aria-label="${escapeHTML(plan.titulo)}" aria-busy="${busy.has(plan.id)}">
-    <div class="plan-head"><div class="plan-title-row"><div><h3>📌 ${escapeHTML(plan.titulo)}</h3><p>Meta fijada: <strong>${money(plan.objetivo)}</strong> &nbsp;·&nbsp; Por casilla: ${escapeHTML(amountSummary)}</p></div><div class="percent"><span>PROGRESO TOTAL</span><strong>${stats.percent.toFixed(1)}%</strong></div></div>
+    <div class="plan-head"><div class="plan-title-row"><div><div class="plan-name"><h3>📌 ${escapeHTML(plan.titulo)}</h3><button type="button" class="button secondary edit-plan" data-action="edit" aria-label="Editar nombre y meta de ${escapeHTML(plan.titulo)}" ${disabled}>Editar</button></div><p>Meta fijada: <strong>${money(plan.objetivo)}</strong> &nbsp;·&nbsp; Por casilla: ${escapeHTML(amountSummary)}</p></div><div class="percent"><span>PROGRESO TOTAL</span><strong>${stats.percent.toFixed(1)}%</strong></div></div>
     <div class="progress" role="progressbar" aria-label="Progreso de ahorro" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${stats.percent.toFixed(1)}"><div class="progress-fill" style="width:${stats.percent}%"></div></div><div class="progress-labels"><span>Inicio: $0</span><strong>${money(stats.saved)} ahorrados</strong><span>${money(plan.objetivo)} Meta</span></div></div>
     <div class="plan-body"><div class="plan-tools"><div class="plan-stats"><span><strong>${money(stats.remaining)}</strong>Monto restante</span><span><strong>${stats.completed} <small>/ ${stats.count}</small></strong>Casillas ahorradas</span></div>
     <form class="deposit-form" data-plan-id="${id}"><div class="deposit-field"><label for="abono-${id}">Abono rápido ($)</label><input id="abono-${id}" name="deposit" type="number" min="0.01" step="0.01" placeholder="Ej: 200" required ${disabled}></div><button type="submit" class="button secondary" ${disabled}>Abonar</button></form></div>
@@ -164,7 +221,7 @@ async function changePlan(id, action) {
       const plan = snapshot.data();
       const changed = action(plan);
       if (changed.remove) transaction.delete(reference);
-      else transaction.update(reference, { celdas: changed.cells });
+      else transaction.update(reference, changed.updates || { celdas: changed.cells });
       return changed;
     });
     if (result.message) message(result.message);
@@ -229,6 +286,7 @@ $('planes').addEventListener('click', async event => {
   }
   const selectedPlan = planes.find(plan => plan.id === id);
   if (!selectedPlan) return;
+  if (action === 'edit' && !busy.has(id)) openEditor(selectedPlan);
   if (action === 'reset' && await confirmAction(action, selectedPlan)) {
     await changePlan(id, plan => ({ cells: plan.celdas.map(cell => ({ ...cell, activo: false })), message: 'Progreso reiniciado.' }));
   }

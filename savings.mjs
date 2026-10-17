@@ -41,6 +41,31 @@ export function summarize(plan) {
   };
 }
 
+export function editPlan(plan, title, target) {
+  const titulo = String(title).trim();
+  if (!titulo || titulo.length > 100) throw new Error('Escribe un nombre de hasta 100 caracteres.');
+  const goal = cents(target);
+  const saved = Math.round(summarize(plan).saved * 100);
+  if (goal === Math.round(Number(plan.objetivo) * 100)) {
+    return { titulo, objetivo: goal / 100, celdas: plan.celdas };
+  }
+  let remaining = Math.max(0, goal - saved);
+  const celdas = [];
+  for (const cell of plan.celdas) {
+    if (cell.activo) celdas.push({ ...cell });
+    else if (remaining > 0) {
+      const amount = Math.min(cents(cell.monto), remaining);
+      celdas.push({ ...cell, monto: amount / 100 });
+      remaining -= amount;
+    }
+  }
+  // Keep existing saved cells intact; extend the pending board using its amounts.
+  const amounts = plan.celdas.length ? plan.celdas.map(cell => cell.monto) : [goal / 100];
+  if (remaining > 0) celdas.push(...createCells(remaining / 100, amounts));
+  if (celdas.length > MAX_CELLS) throw new Error(`El plan supera las ${MAX_CELLS} casillas.`);
+  return { titulo, objetivo: goal / 100, celdas };
+}
+
 export function applyDeposit(cells, amount) {
   let remaining = cents(amount);
   let marked = 0;

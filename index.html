@@ -52,6 +52,16 @@
       <div class="confirm-actions"><button class="button secondary" value="cancel" autofocus>Cancelar</button><button id="confirm-accept" class="button confirm-accept" value="confirm">Sí, reiniciar</button></div>
     </form>
   </dialog>
+  <dialog id="editar-plan" class="confirm-dialog" aria-labelledby="edit-title" aria-describedby="edit-help">
+    <form id="edit-form" class="confirm-content">
+      <div class="confirm-top"><h2 id="edit-title">Editar plan</h2><button type="button" class="confirm-close" id="edit-close" aria-label="Cerrar edición">×</button></div>
+      <div class="field"><label for="edit-name">Nombre del plan</label><input id="edit-name" maxlength="100" required></div>
+      <div class="field"><label for="edit-goal">Meta total ($)</label><input id="edit-goal" type="number" min="0.01" step="0.01" required></div>
+      <p id="edit-help">Tu ahorro registrado se conserva. Al cambiar la meta se ajustan las casillas pendientes.</p>
+      <p id="edit-error" class="notice" role="alert" hidden></p>
+      <div class="confirm-actions"><button type="button" id="edit-cancel" class="button secondary">Cancelar</button><button type="submit" id="edit-save" class="button primary">Guardar cambios</button></div>
+    </form>
+  </dialog>
   <script type="module" src="script.js"></script>
 </body>
 </html>
