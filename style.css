@@ -20,8 +20,7 @@ input::placeholder{color:#9aaac0}
 .deposit-field input{min-height:44px}
 .filters{max-width:100%;flex-wrap:wrap;gap:4px}
 .filter{min-height:44px;padding:9px 12px}
-.legend{gap:12px 22px;line-height:1.7}
-.legend i{width:14px;height:14px;flex-shrink:0}
+.grid-toolbar + .grid{margin-top:12px}
 .celda{min-height:48px}
 .progress-labels{flex-wrap:wrap;row-gap:6px}
 .plan-actions{flex-wrap:wrap;line-height:1.7}
@@ -52,7 +51,7 @@ input::placeholder{color:#9aaac0}
 }
 
 .plan-name{display:flex;align-items:center;flex-wrap:wrap;gap:10px 16px}
-.plan-name h3{min-width:0}
+.plan-name h3{min-width:0;white-space:pre-wrap}
 .edit-plan{font-size:14px;padding:8px 12px}
 #edit-form>.field{margin-bottom:20px}
 #edit-help{margin-bottom:22px;font-size:15px}
@@ -69,7 +68,7 @@ body.modal-open{overflow:hidden}
 .confirm-dialog p{font-size:17px;color:#b9c6d8;line-height:1.75}
 .confirm-plan{padding:16px 18px;border:1px solid #334155;border-radius:14px;background:#0b132399;margin:24px 0}
 .confirm-plan span{display:block;font-size:12px;font-weight:700;letter-spacing:1.4px;color:#aabbd1;margin-bottom:7px}
-.confirm-plan strong{font-size:18px;overflow-wrap:anywhere}
+.confirm-plan strong{font-size:18px;overflow-wrap:anywhere;white-space:pre-wrap}
 .confirm-actions{display:flex;gap:12px;justify-content:flex-end}
 .confirm-actions .button{min-height:48px;font-size:16px;padding:12px 20px}
 .confirm-accept{background:#fbbf24;color:#241601;border-color:#fcd34d}
